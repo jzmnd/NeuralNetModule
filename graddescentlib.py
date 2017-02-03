@@ -11,6 +11,7 @@ University of California, Berkeley
 j-smith@berkeley.edu
 """
 
+from __future__ import division
 import os
 import sys
 from myfunctions import *
@@ -18,7 +19,6 @@ import numpy as np
 import random as rnd
 from lossfunctionlib import *
 from optutils import *
-from __future__ import division
 
 __author__ = "Jeremy Smith"
 __version__ = "1.0"

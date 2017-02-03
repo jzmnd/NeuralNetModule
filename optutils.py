@@ -13,11 +13,8 @@ University of California, Berkeley
 j-smith@berkeley.edu
 """
 
-import numpy as np
 from __future__ import division
-
-
-methods = {'sgd': sgd, 'momentum': momentum, 'nag': nag, 'adagrad': adagrad, 'adam': adam}
+import numpy as np
 
 
 def sgd(w, dw, config=None):
@@ -174,3 +171,6 @@ def adam(w, dw, config=None):
 	config['v'] = v
 
 	return w, config, abs(update_scale / weights_scale)
+
+
+methods = {'sgd': sgd, 'momentum': momentum, 'nag': nag, 'adagrad': adagrad, 'adam': adam}
