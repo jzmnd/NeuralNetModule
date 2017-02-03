@@ -1,0 +1,32 @@
+name: 'defaultNN'
+nettype: 'sequential'
+layers:
+  - name: 'layer0'
+    id: 0
+    type: 'inputLayer'
+    config:
+        dims: 3
+  - name: 'layer1'
+    id: 1
+    type: 'hiddenLayer'
+    config:
+        init: 'random'
+        activation: 'reLU'
+        reg: true
+        dims: 5
+  - name: 'layer2'
+    id: 2
+    type: 'hiddenLayer'
+    conifg:
+        init: 'random'
+        activation: 'reLU'
+        reg: true
+        dims: 5
+  - name: 'layer3'
+    id: 3
+    type: 'outputLayer'
+    config:
+        init: 'random'
+        ftype: 'softmax'
+        reg: true
+        dims: 2
