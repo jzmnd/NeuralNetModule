@@ -62,7 +62,7 @@ def momentum(w, dw, config=None):
 	v = config['mu'] * v - config['learning_rate'] * dw
 
 	update_scale = np.linalg.norm(v.ravel())
-	
+
 	w += v
 
 	config['v'] = v
@@ -90,7 +90,7 @@ def nag(w, dw, config=None):
 	v0 = config['v']
 	mu = config['mu']
 	v1 = mu * v0 - config['learning_rate'] * dw
-	
+
 	update = -mu * v0 + (1 + mu) * v1
 	update_scale = np.linalg.norm(update.ravel())
 
@@ -163,14 +163,14 @@ def adam(w, dw, config=None):
 	t += 1
 
 	alpha = config['learning_rate'] * np.sqrt(1 - beta2 ** t) / (1 - beta1 ** t)
-	
+
 	update = -alpha * (m / (np.sqrt(v) + eps))
 	update_scale = np.linalg.norm(update.ravel())
 
 	w += update
-	
+
 	config['t'] = t
 	config['m'] = m
 	config['v'] = v
-	
+
 	return w, config, abs(update_scale / weights_scale)

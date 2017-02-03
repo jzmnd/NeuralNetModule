@@ -36,10 +36,8 @@ class LinearClassifier():
 
 		self.update_function = methods[self.config['update_type']]
 
-
 	def train(self, X, y, k=1):
 		print "TRAINING ON DATA"
-		
 		print "  num of points      :", y.size
 		print "  num of dimensions  :", X.shape[0]
 		print "  num of classes     :", k
@@ -58,13 +56,11 @@ class LinearClassifier():
 
 		return
 
-
 	def run(self, X):
 		if not weights:
 			print "Train classifier first!"
 			return
 		return score_function(X, self.weights)
-
 
 	def plot(self):
 		quickPlot("loss_f{:s}".format(self.filenametag), self.path, [np.arange(count-1) + 1, self.losses],
@@ -74,7 +70,6 @@ class LinearClassifier():
 		quickPlot("accuracy{:s}".format(self.filenametag), self.path, [np.arange(count-1) + 1, self.accuracy],
 			xlabel="step", ylabel="accuracy [%]", yscale="linear")
 		return
-
 
 	def writeout(self):
 		dataOutputGen("weights{:s}.txt".format(self.filenametag), self.path, self.weights)
