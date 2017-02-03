@@ -105,7 +105,7 @@ def grad_descent(X, y, W, config):
 
 	update_function = methods[config['update_type']]
 
-	while (loss > maxloss) and (count <= maxsteps):
+	while (loss > config['maxloss']) and (count <= config['maxsteps']):
 		if config['btype'] == 'minibatch' or config['btype'] == 'stochastic':
 			if config['btype'] == 'stochastic':
 				mask = rnd.sample(xrange(num_images), 1)

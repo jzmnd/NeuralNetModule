@@ -63,11 +63,11 @@ class LinearClassifier():
 		return score_function(X, self.weights)
 
 	def plot(self):
-		quickPlot("loss_f{:s}".format(self.filenametag), self.path, [np.arange(count-1) + 1, self.losses],
+		quickPlot("loss_f{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.losses],
 			xlabel="step", ylabel="loss", yscale="log")
-		quickPlot("grad_err{:s}".format(self.filenametag), self.path, [np.arange(count-1) + 1, self.gradcheck],
+		quickPlot("grad_err{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.gradcheck],
 			xlabel="step", ylabel="relative grad error", yscale="log")
-		quickPlot("accuracy{:s}".format(self.filenametag), self.path, [np.arange(count-1) + 1, self.accuracy],
+		quickPlot("accuracy{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.accuracy],
 			xlabel="step", ylabel="accuracy [%]", yscale="linear")
 		return
 
