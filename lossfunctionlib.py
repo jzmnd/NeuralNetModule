@@ -64,17 +64,18 @@ def loss_function(scores, y, ftype='svm', delta=1.0):
 		grad = indicatorf / num_images
 
 	elif ftype == 'softmax':
-		# first shift scores so highest value is 0
+		# first shift scores so highest value is 0 and calculate exp
 		scores_shift = scores - np.max(scores)
 		exp_scores = np.exp(scores_shift)
-		# calculate sum of scores and probability (allows for 0 sum)
-		sum_exp_scores = np.sum(exp_scores, axis=0) + 1e-150
-		probs = exp_scores / sum_exp_scores
+
+		# calculate probabilities (allows for 0 sum)
+		probs = exp_scores / np.sum(exp_scores, axis=0) + 1e-150
+
 		# compute the cross entropy loss for each image
 		if num_images == 1:
-			loss_i = -scores_shift[y] + np.log(sum_exp_scores)
+			loss_i = -np.log(probs[y])
 		else:
-			loss_i = -scores_shift[y, np.arange(num_images)] + np.log(sum_exp_scores)
+			loss_i = -np.log(probs[y, np.arange(num_images)])
 
 		# calculte loss (averaged over all images)
 		loss = np.sum(loss_i) / num_images
