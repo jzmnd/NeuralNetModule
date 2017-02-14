@@ -67,20 +67,20 @@ def loss_function(scores, y, ftype='svm', delta=1.0):
 		# first shift scores so highest value is 0
 		scores_shift = scores - np.max(scores)
 		exp_scores = np.exp(scores_shift)
+		# calculate sum of scores and probability (allows for 0 sum)
+		sum_exp_scores = np.sum(exp_scores, axis=0) + 1e-150
+		probs = exp_scores / sum_exp_scores
 		# compute the cross entropy loss for each image
 		if num_images == 1:
-			loss_i = -scores_shift[y] + np.log(np.sum(exp_scores, axis=0) + 1e-150)
+			loss_i = -scores_shift[y] + np.log(sum_exp_scores)
 		else:
-			loss_i = -scores_shift[y, np.arange(num_images)] + np.log(np.sum(exp_scores, axis=0) + 1e-150)
+			loss_i = -scores_shift[y, np.arange(num_images)] + np.log(sum_exp_scores)
 
 		# calculte loss (averaged over all images)
 		loss = np.sum(loss_i) / num_images
 
-		# calculate coefficient for gradient for each image (allow for zero denominator)
-		probs = exp_scores * (1.0 / (np.sum(exp_scores, axis=0) + 1e-150))
-
 		# calculate matrix of ones in y-th positions
-		indicatorf = np.zeros(probs.shape)
+		indicatorf = np.zeros(scores.shape)
 		if num_images == 1:
 			indicatorf[y] = 1
 		else:
