@@ -19,39 +19,22 @@ import numpy as np
 import random as rnd
 
 __author__ = "Jeremy Smith"
-__version__ = "1.1"
+__version__ = "1.2"
 
 
-def score_function(x, W):
-	"""Simple linear score function"""
-	return np.dot(W, x)
-
-
-def score_function_bias(x, W, b):
-	"""Simple linear score function with explicit bias"""
-	return W.dot(x) + b
-
-
-def loss_function(X, y, W, sf=score_function, ftype='svm', delta=1.0, reg=True, gamma=0.01):
+def loss_function(scores, y, ftype='svm', delta=1.0):
 	"""
-	Loss function implementation (fully vectorized)
-	-- X: holds all the data as columns (e.g. 3073 x 50,000 in CIFAR-10)
-	-- y: array of integers specifying correct class (e.g. 50,000-D array)
-	-- W: weights (e.g. 10 x 3073)
-	-- sf: the score function to be implemented
-	-- type: can be either 'svm' or 'softmax'
-	-- reg: sets whether to include regularization loss
-	-- gamma: regularization hyperparameter
-	-- Also works if number of images is 1
+	Loss function implementation (fully vectorized, also works if number of images is 1)
+	  -- scores: holds all the input scores as columns (e.g. 10 x 50,000 in CIFAR-10)
+	  -- y: array of integers specifying correct class (e.g. 50,000-D array)
+	  -- W: weights (e.g. 10 x 3073)
+	  -- type: can be either 'svm' or 'softmax'
+	Returns
+	  -- Loss scalar (svm or softmax)
+	  -- Gradient of loss wrt scores
 	"""
 
-	num_classes = W.shape[0]      # K
-	num_images = y.size           # N
-	num_pixels = X.shape[0] - 1   # D, allows for final 1 (from bias trick)
-
-	scores = sf(X, W)
-
-	grad = np.zeros(W.shape)
+	num_images = y.size
 
 	if ftype == 'svm':
 		if num_images == 1:
@@ -70,14 +53,15 @@ def loss_function(X, y, W, sf=score_function, ftype='svm', delta=1.0, reg=True, 
 
 		# calculate the indicator function for all classes and images
 		indicatorf = np.where(margins > 0, 1, 0)
+
 		# set y-th positions to be the sum of indicator values for each image
 		if num_images == 1:
 			indicatorf[y] = -np.sum(indicatorf, axis=0)
 		else:
 			indicatorf[y, np.arange(num_images)] = -np.sum(indicatorf, axis=0)
 
-		# calculte gradient (averaged over all images)
-		grad = np.dot(indicatorf, X.T) / num_images
+		# calculte gradient of svm loss wrt scores (averaged over all images)
+		grad = indicatorf / num_images
 
 	elif ftype == 'softmax':
 		# first shift scores so highest value is 0
@@ -96,24 +80,18 @@ def loss_function(X, y, W, sf=score_function, ftype='svm', delta=1.0, reg=True, 
 		probs = exp_scores * (1.0 / (np.sum(exp_scores, axis=0) + 1e-150))
 
 		# calculate matrix of ones in y-th positions
-		indicatorf = np.zeros(shape=(num_classes, num_images))
+		indicatorf = np.zeros(probs.shape)
 		if num_images == 1:
 			indicatorf[y] = 1
 		else:
 			indicatorf[y, np.arange(num_images)] = 1
-		# gradient of softmax loss
-		dsm = probs - indicatorf
-
-		# calculte gradient (averaged over all images)
-		grad = np.dot(dsm, X.T) / num_images
+		
+		# calculate gradient of softmax loss wrt scores (averaged over all images)
+		grad = (probs - indicatorf) / num_images
 
 	else:
 		print "Incorrect loss function type"
 		loss = 0
-
-	# add regularization loss if required
-	if reg:
-		loss += 0.5 * gamma * np.sum(W**2)
-		grad += gamma * W
+		grad = np.zeros(scores.shape)
 
 	return loss, grad

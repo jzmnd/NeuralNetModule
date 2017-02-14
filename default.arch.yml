@@ -1,4 +1,4 @@
-name: 'defaultNN'
+name: 'defaultNNarch'
 nettype: 'sequential'
 layers:
   - name: 'layer0'

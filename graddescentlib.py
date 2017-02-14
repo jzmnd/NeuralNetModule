@@ -19,6 +19,7 @@ import numpy as np
 import random as rnd
 from lossfunctionlib import *
 from optutils import *
+from funcutils import *
 
 __author__ = "Jeremy Smith"
 __version__ = "1.0"
@@ -50,8 +51,8 @@ def eval_num_grad(f, x, step=1e-6):
 
 	return grad
 
-
-def grad_check_sparse(f, x, analytic_grad, num_checks=3, step=1e-6, verbose=False):
+# 
+def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=False):
 	"""Samples random elements and returns numerical grad in these dimensions"""
 
 	av_rel_error = 0
@@ -62,10 +63,10 @@ def grad_check_sparse(f, x, analytic_grad, num_checks=3, step=1e-6, verbose=Fals
 
 		# evaluate at x + step
 		x[ix] = x0 + step
-		fxp = f(x)[0]
+		fxp = f(x)
 		# evaluate at x - step
 		x[ix] = x0 - step
-		fxm = f(x)[0]
+		fxm = f(x)
 		# return to original value
 		x[ix] = x0
 		# compute the numerical derivative
@@ -82,6 +83,19 @@ def grad_check_sparse(f, x, analytic_grad, num_checks=3, step=1e-6, verbose=Fals
 	return av_rel_error / num_checks
 
 
+def loss_calc(X, y, W, config):
+	# calculate scores on batch
+	scores = score_function(X, W)
+
+	# calculate loss and gradient on loss wrt weights
+	loss, dscores = loss_function(scores, y, ftype=config['ftype'])
+	dW = np.dot(dscores, X.T)
+	if config['reg']:
+		loss += 0.5 * config['gamma'] * np.sum(W**2)
+		dW += config['gamma'] * W
+	return loss, dW
+
+
 def grad_descent(X, y, W, config):
 	"""
 	Performs the gradient descent
@@ -95,11 +109,9 @@ def grad_descent(X, y, W, config):
 	"""
 
 	num_images = y.size
-	weights = W
-
 	count = 1
 	loss = np.inf
-	gradcheck = []
+	gradchecks = []
 	losses = []
 	accuracies = []
 
@@ -117,29 +129,29 @@ def grad_descent(X, y, W, config):
 			Xbatch = X
 			ybatch = y
 
-		# define a loss function that takes a single arguement i.e. the weights
-		lf = lambda w: loss_function(Xbatch, ybatch, w, ftype=config['ftype'], reg=config['reg'], gamma=config['gamma'])
+		# calculate loss and gradient on loss wrt weights
+		loss, dW = loss_calc(Xbatch, ybatch, W, config)
 
-		# calculate loss and gradient for weights
-		loss, dW = lf(weights)
-
+		# define a function that takes a single arguement i.e. the weights and returns a single value i.e. the loss
+		f = lambda w: loss_calc(Xbatch, ybatch, w, config)[0]
 		# check gradient numerically for a few points
-		gradcheck.append(grad_check_sparse(lf, weights, dW, num_checks=config['num_checks'], step=config['gradcheckstep']))
+		gradcheck = grad_check_sparse(f, W, analytic_grad=dW, num_checks=config['num_checks'], step=config['gradcheckstep'])
 
-		# update weights using update_function also calculates weights:updates ratio
-		weights, config, w_u_ratio = update_function(weights, dW, config)
+		# update weights using update_function, also calculates weights:updates ratio and updates config
+		W, config, w_u_ratio = update_function(W, dW, config)
 
 		# calculate accuracy on fly
-		scores = score_function(X, weights)
+		scores = score_function(X, W)
 		predicted_classes = np.argmax(scores, axis=0)
 		accuracy = np.mean(predicted_classes == y) * 100
 
 		if config['verbose']:
 			if (count % 10 == 0) or (count == 1):
-				print "step: {:4d}   loss: {:.5e}   w/u ratio: {:.3e}   accuracy: {:.2f} %".format(count, loss, w_u_ratio, accuracy)
+				print "step: {:4d}   loss: {:.5e}   w/u ratio: {:.3e}   gradcheck: {:.3e}   accuracy: {:.2f} %".format(count, loss, w_u_ratio, gradcheck, accuracy)
 
+		gradchecks.append(gradcheck)
 		accuracies.append(accuracy)
 		losses.append(loss)
 		count += 1
 
-	return np.array(losses), weights, dW, np.array(gradcheck), np.array(accuracies), count
+	return np.array(losses), W, dW, np.array(gradcheck), np.array(accuracies), count
