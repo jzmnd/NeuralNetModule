@@ -92,15 +92,16 @@ class FeedForwardNN():
 		return np.array(dW_list[::-1])
 
 	def compute_loss(self, X, y):
+		"""Computes loss based on scores compared to y"""
 		# Compute forward pass scores
-		scores = forward(X)
+		scores = self.forward(X)
 		# Loss function type on last layer
 		ftype = self.layer[-1]['config']['ftype']
 		# Calculate loss and gradient on loss wrt weights
 		loss, dscores = loss_function(scores, y, ftype=ftype)
 		
 		# Backprop gradient
-		dW = backprop(dscores)
+		dW = self.backprop(dscores)
 		if self.layer[-1]['config']['reg']:
 			loss += 0.5 * config['gamma'] * np.sum(W**2)
 			dW += config['gamma'] * W
