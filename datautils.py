@@ -65,10 +65,10 @@ def preprocess(x, norm=None):
 	return x, mean, xnorm
 
 
-def initializeweights(X, k=1, a=2.0, b=0.01):
-	"""Initialize weights for data X"""
-	num_images = X.shape[1]
-	num_dims = X.shape[0]
+def initializeweights(num_images, num_dims, k=1, a=2.0, b=0.01):
+	"""Initialize weights for array of size """
+	#num_images = X.shape[1]
+	#num_dims = X.shape[0]
 	if k == 1:
 		return b * np.random.randn(num_dims).astype('float64') * np.sqrt(a / num_images)
 	else:
