@@ -12,19 +12,24 @@ layers:
     config:
         init: 'random'
         activation: 'reLU'
+        reg: true
+        gamma: 0.01
         dims: 5
   - name: 'layer2'
     id: 2
     type: 'hiddenLayer'
-    conifg:
+    config:
         init: 'random'
         activation: 'reLU'
+        reg: true
+        gamma: 0.01
         dims: 5
   - name: 'layer3'
     id: 3
     type: 'outputLayer'
     config:
         init: 'random'
-        ftype: 'softmax'
+        ftype: 'svm'
         reg: true
+        gamma: 0.01
         dims: 2
