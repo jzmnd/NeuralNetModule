@@ -38,70 +38,70 @@ class FeedForwardNN():
 		# Holds cached values for each layer
 		self.cache = []
 
-		if not weights:
-			initW()
-
-	def initW(self):
-		"""Init weights with random numbers"""
-		for layer in self.layers:
-
-
-
 	def forward(self, X):
 		"""Forward propagation of data through NN"""
 		for layer in self.layers:
 			if layer['type'] == 'inputLayer':
+				# Append output to cache
 				self.cache.append(X)
 
 			if layer['type'] == 'hiddenLayer':
+				# Find weights and activation function for layer
 				activation_function = functions[layer['config']['activation']]
 				Wi = self.weights[layer['id'] - 1]
-
+				# Calculate output of layer and append to cache
 				X = activation_function(np.dot(Wi, X))
 				self.cache.append(X)
 
 			if layer['type'] == 'outputLayer':
+				# Find weights for layer
 				Wi = self.weights[layer['id'] - 1]
-
+				# Calculate output of layer and append to cache
 				X = np.dot(Wi, X)
 				self.cache.append(X)
-
 		return X
 
 	def backprop(self, dX):
 		"""Backward propagation of gradients through NN"""
 		dW_list = []
-		for layer in self.layer[::-1]:
+		for layer in self.layers[::-1]:
 			if layer['type'] == 'outputLayer':
+				# Find weights and cached output for layer
 				Xi = self.cache[layer['id']]
 				Wi = self.weights[layer['id'] - 1]
-				
+				# Calculate gradients and append to list
 				dX_tmp = np.dot(Wi.T, dX)
 				dW = np.dot(dX, Xi.T)
-
 				dX = dX_tmp
 				dW_list.append(dW)
 
 			if layer['type'] == 'hiddenLayer':
+				# Find weights, cached output and activation function for layer
 				activation_function_grad = gradientfunctions[layer['config']['activation']]
 				Xi = self.cache[layer['id']]
 				Wi = self.weights[layer['id'] - 1]
-
-				dX = activation_function_grad(Xi) * dX
-
+				# Calculate gradients and append to list
+				dX = np.multiply(activation_function_grad(Xi), dX)
 				dX_tmp = np.dot(Wi.T, dX)
 				dW = np.dot(dX, Xi.T)
-
 				dX = dX_tmp
 				dW_list.append(dW)
 
 			if layer['type'] == 'inputLayer':
 				continue
+		return np.array(dW_list[::-1])
 
-		return dW_list[::-1]
-
-
-	def compute_loss(self):
-		return
-
-
+	def compute_loss(self, X, y):
+		# Compute forward pass scores
+		scores = forward(X)
+		# Loss function type on last layer
+		ftype = self.layer[-1]['config']['ftype']
+		# Calculate loss and gradient on loss wrt weights
+		loss, dscores = loss_function(scores, y, ftype=ftype)
+		
+		# Backprop gradient
+		dW = backprop(dscores)
+		if self.layer[-1]['config']['reg']:
+			loss += 0.5 * config['gamma'] * np.sum(W**2)
+			dW += config['gamma'] * W
+		return loss, dW

@@ -12,7 +12,6 @@ layers:
     config:
         init: 'random'
         activation: 'reLU'
-        reg: true
         dims: 5
   - name: 'layer2'
     id: 2
@@ -20,7 +19,6 @@ layers:
     conifg:
         init: 'random'
         activation: 'reLU'
-        reg: true
         dims: 5
   - name: 'layer3'
     id: 3
