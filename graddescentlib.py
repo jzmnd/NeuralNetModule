@@ -27,7 +27,7 @@ __version__ = "1.1"
 def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=False):
 	"""
 	Samples random elements and returns numerical grad in these dimensions
-	-- f: single arguement function
+	-- f: single argument function
 	-- x: x values for function f
 	-- analytic_grad: analytic gradient to compare to numerical gradient
 	-- num_checks: number of points to check
