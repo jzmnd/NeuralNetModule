@@ -17,43 +17,22 @@ import sys
 from myfunctions import *
 import numpy as np
 import random as rnd
-from lossfunctionlib import *
 from optutils import *
 from funcutils import *
 
 __author__ = "Jeremy Smith"
-__version__ = "1.0"
+__version__ = "1.1"
 
 
-def eval_num_grad(f, x, step=1e-6):
-	"""Center difference numerical gradient"""
-
-	grad = np.zeros(x.shape)
-
-	# iterate over all indexes in x
-	it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
-	while not it.finished:
-		ix = it.multi_index
-		x0 = x[ix]
-
-		# evaluate at x + step
-		x[ix] = x0 + step
-		fxp = f(x)
-		# evaluate at x - step
-		x[ix] = x0 - step
-		fxm = f(x)
-		# return to original value
-		x[ix] = x0
-		# compute the partial derivative
-		grad[ix] = 0.5 * (fxp - fxm) / step
-
-		it.iternext()
-
-	return grad
-
-# 
 def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=False):
-	"""Samples random elements and returns numerical grad in these dimensions"""
+	"""
+	Samples random elements and returns numerical grad in these dimensions
+	-- f: single arguement function
+	-- x: x values for function f
+	-- analytic_grad: analytic gradient to compare to numerical gradient
+	-- num_checks: number of points to check
+	-- step: step size for numerical gradient calculation
+	"""
 
 	av_rel_error = 0
 
@@ -83,32 +62,20 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 	return av_rel_error / num_checks
 
 
-def loss_calc(X, y, W, config):
-	# calculate scores on batch
-	scores = score_function(X, W)
-
-	# calculate loss and gradient on loss wrt weights
-	loss, dscores = loss_function(scores, y, ftype=config['ftype'])
-	dW = np.dot(dscores, X.T)
-	if config['reg']:
-		loss += 0.5 * config['gamma'] * np.sum(W**2)
-		dW += config['gamma'] * W
-	return loss, dW
-
-
-def grad_descent(X, y, W, config):
+def grad_descent(X, y, W, config, lossf):
 	"""
-	Performs the gradient descent
+	Performs the gradient descent and weights update
 	-- X: holds all the data as columns (e.g. 3073 x 50,000 in CIFAR-10)
 	-- y: array of integers specifying correct class (e.g. 50,000-D array)
 	-- W: weights (e.g. 10 x 3073)
 	-- config: dictionary containing all the configuration options
-	-- Has options for full, minibatch or stochastic
+	-- lossf: loss function (function that takes X, y, W and returns loss, dW)
+	-- Has options for 'full', 'minibatch' or 'stochastic'
 	-- Has options for weight update function from optutils
 	-- Has options for 'svm' or 'softmax' loss functions
 	"""
 
-	num_images = y.size
+	n = y.size
 	count = 1
 	loss = np.inf
 	gradchecks = []
@@ -120,9 +87,9 @@ def grad_descent(X, y, W, config):
 	while (loss > config['maxloss']) and (count <= config['maxsteps']):
 		if config['btype'] == 'minibatch' or config['btype'] == 'stochastic':
 			if config['btype'] == 'stochastic':
-				mask = rnd.sample(xrange(num_images), 1)
+				mask = rnd.sample(xrange(n), 1)
 			else:
-				mask = rnd.sample(xrange(num_images), config['batch_size'])
+				mask = rnd.sample(xrange(n), config['batch_size'])
 			Xbatch = X[:, mask]
 			ybatch = y[mask]
 		else:
@@ -130,10 +97,10 @@ def grad_descent(X, y, W, config):
 			ybatch = y
 
 		# calculate loss and gradient on loss wrt weights
-		loss, dW = loss_calc(Xbatch, ybatch, W, config)
+		loss, dW = lossf(Xbatch, ybatch, W)
 
 		# define a function that takes a single arguement i.e. the weights and returns a single value i.e. the loss
-		f = lambda w: loss_calc(Xbatch, ybatch, w, config)[0]
+		f = lambda w: lossf(Xbatch, ybatch, w)[0]
 		# check gradient numerically for a few points
 		gradcheck = grad_check_sparse(f, W, analytic_grad=dW, num_checks=config['num_checks'], step=config['gradcheckstep'])
 

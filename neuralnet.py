@@ -100,7 +100,7 @@ class FeedForwardNN():
 				continue
 		return dW_list[::-1]
 
-	def compute_loss(self, X, y):
+	def compute_loss(self, X, y, W):
 		"""Computes loss and gradients wrt weights, based on scores compared to y"""
 		# Compute forward pass scores
 		scores = self.forward(X)

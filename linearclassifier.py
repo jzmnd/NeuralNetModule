@@ -45,7 +45,7 @@ class LinearClassifier():
 		X = biastrick(X)
 		Winit = initializeweights(y.size, X.shape[0], k)
 
-		results = grad_descent(X, y, Winit, self.config)
+		results = grad_descent(X, y, Winit, self.config, self.compute_loss)
 
 		self.losses = results[0]
 		self.weights = results[1]
@@ -55,6 +55,17 @@ class LinearClassifier():
 		self.count = results[5]
 
 		return
+
+	def compute_loss(self, X, y, W):
+		scores = score_function(X, W)
+		loss, dscores = loss_function(scores, y, ftype=self.config['ftype'])
+		dW = np.dot(dscores, X.T)
+
+		if self.config['reg']:
+			loss += 0.5 * self.config['gamma'] * np.sum(W**2)
+			dW += self.config['gamma'] * W
+
+		return loss, dW
 
 	def run(self, X):
 		if not weights:

@@ -1,12 +1,12 @@
 ftype: 'softmax'
-btype: 'minibatch'
+btype: 'full'
 update_type: 'nag'
 reg: true
 gamma: 0.01
 maxloss: 1.0
 maxsteps: 1000
 batch_size: 1024
-learning_rate: 1.0e-06
+learning_rate: 1.0e-03
 lr_decay: 0.95
 mu: 0.9
 beta1: 0.9

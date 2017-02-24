@@ -66,9 +66,14 @@ class Solver():
 
 		# TODO: perform grad descent and updates
 
+		results = grad_descent(self.X_train, self.y_train, self.model.weights, self.config, self.model.compute_loss)
+
+		print results
+
 		return
 
 	def init_weights(self, a, b):
+		"""initialize weights for all layers"""
 		if not self.model.weights:
 			self.model.weights = []
 			for layer in self.model.layers:
