@@ -24,7 +24,7 @@ __version__ = "1.0"
 
 
 class FeedForwardNN():
-	"""Class for descibing basic feed forward neural network"""
+	"""Class for descibing basic fully connected feed forward neural network"""
 	def __init__(self, weights=None, architecture="default.arch.yml", name="default"):
 		self.weights = weights
 		self.name = name
@@ -38,48 +38,54 @@ class FeedForwardNN():
 		# Holds cached values for each layer
 		self.cache = []
 
-	def forward(self, X):
+	def forward(self, X, W=None):
 		"""Forward propagation of data through NN"""
+		if W is None:
+			W = self.weights
+		if W is None:
+			print "Train NN or provide explicit weights"
+		# Clear cache
+		self.cache = []
 		for layer in self.layers:
-			print "  forwardp:", layer['name'], 
+			#print "  forwardp:", layer['name'], 
 			if layer['type'] == 'inputLayer':
 				# Append output to cache
 				self.cache.append(X)
-				print X.shape
+				#print X.shape
 
 			if layer['type'] == 'hiddenLayer':
 				# Find weights and activation function for layer
 				activation_function = functions[layer['config']['activation']]
-				Wi = self.weights[layer['id'] - 1]
+				Wi = W[layer['id'] - 1]
 				# Calculate output of layer and append to cache
 				X = activation_function(np.dot(Wi, X))
 				self.cache.append(X)
-				print X.shape
+				#print X.shape
 
 			if layer['type'] == 'outputLayer':
 				# Find weights for layer
-				Wi = self.weights[layer['id'] - 1]
+				Wi = W[layer['id'] - 1]
 				# Calculate output of layer and append to cache
 				X = np.dot(Wi, X)
 				self.cache.append(X)
-				print X.shape
+				#print X.shape
 		return X
 
 	def backprop(self, dX):
 		"""Backward propagation of gradients through NN"""
 		dW_list = []
 		for layer in self.layers[::-1]:
-			print "  backprop:", layer['name'],
+			#print "  backprop:", layer['name'],
 			if layer['type'] == 'outputLayer':
 				# Find weights and cached output for layer
 				Xi1 = self.cache[layer['id'] - 1]
 				Wi = self.weights[layer['id'] - 1]
-				# Calculate gradients and append to list
+				# Calculate gradients and append to dw list
 				dX_tmp = np.dot(Wi.T, dX)
 				dW = np.dot(dX, Xi1.T)
 				dX = dX_tmp
 				dW_list.append(dW)
-				print dX.shape, dW.shape
+				#print dX.shape, dW.shape
 
 			if layer['type'] == 'hiddenLayer':
 				# Find weights, cached output and activation function for layer
@@ -87,30 +93,30 @@ class FeedForwardNN():
 				Xi = self.cache[layer['id']]
 				Xi1 = self.cache[layer['id'] - 1]
 				Wi = self.weights[layer['id'] - 1]
-				# Calculate gradients and append to list
+				# Calculate gradients and append to dW list
 				dX = np.multiply(activation_function_grad(Xi), dX)
 				dX_tmp = np.dot(Wi.T, dX)
 				dW = np.dot(dX, Xi1.T)
 				dX = dX_tmp
 				dW_list.append(dW)
-				print dX.shape, dW.shape
+				#print dX.shape, dW.shape
 
 			if layer['type'] == 'inputLayer':
-				print "NONE"
+				#print "NONE"
 				continue
-		return dW_list[::-1]
+		return np.array(dW_list[::-1])
 
 	def compute_loss(self, X, y, W):
 		"""Computes loss and gradients wrt weights, based on scores compared to y"""
 		# Compute forward pass scores
 		scores = self.forward(X)
 
-		# Loss function type (config on output layer)
+		# Loss function type (config on last layer)
 		ftype = self.layers[-1]['config']['ftype']
 		# Calculate loss and gradient on loss wrt weights
 		loss, dscores = loss_function(scores, y, ftype=ftype)
-		
-		# Backprop gradient
+
+		# Backprop of gradient
 		dW = self.backprop(dscores)
 
 		# Add regularization loss to each layer

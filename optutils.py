@@ -17,6 +17,22 @@ from __future__ import division
 import numpy as np
 
 
+def gflatten(x):
+	"""Generalized flatten function for ndarrays"""
+	if x.dtype == 'float64':
+		return x.ravel()
+	if x.dtype == 'object':
+		return np.hstack([xi.ravel() for xi in x])
+
+
+def g_zeros_like(x):
+	"""Generalized zeros_like for ndarrays"""
+	if x.dtype == 'float64':
+		return np.zeros_like(x)
+	if x.dtype == 'object':
+		return np.array([np.zeros_like(xi) for xi in x])
+
+
 def sgd(w, dw, config=None):
 	"""
 	Performs vanilla stochastic gradient descent
@@ -28,10 +44,10 @@ def sgd(w, dw, config=None):
 		config = {}
 	config.setdefault('learning_rate', 1e-2)
 
-	weights_scale = np.linalg.norm(w.ravel())
+	weights_scale = np.linalg.norm(gflatten(w))
 
 	update = config['learning_rate'] * dw
-	update_scale = np.linalg.norm(update.ravel())
+	update_scale = np.linalg.norm(gflatten(update))
 
 	w -= update
 
@@ -53,12 +69,12 @@ def momentum(w, dw, config=None):
 	config.setdefault('mu', 0.9)
 	config.setdefault('v', 0)
 
-	weights_scale = np.linalg.norm(w.ravel())
+	weights_scale = np.linalg.norm(gflatten(w))
 
 	v = config['v']
 	v = config['mu'] * v - config['learning_rate'] * dw
 
-	update_scale = np.linalg.norm(v.ravel())
+	update_scale = np.linalg.norm(gflatten(v))
 
 	w += v
 
@@ -82,14 +98,14 @@ def nag(w, dw, config=None):
 	config.setdefault('mu', 0.9)
 	config.setdefault('v', 0)
 
-	weights_scale = np.linalg.norm(w.ravel())
+	weights_scale = np.linalg.norm(gflatten(w))
 
 	v0 = config['v']
 	mu = config['mu']
 	v1 = mu * v0 - config['learning_rate'] * dw
 
 	update = -mu * v0 + (1 + mu) * v1
-	update_scale = np.linalg.norm(update.ravel())
+	update_scale = np.linalg.norm(gflatten(update))
 
 	w += update
 
@@ -110,16 +126,16 @@ def adagrad(w, dw, config=None):
 	if config is None:
 		config = {}
 	config.setdefault('learning_rate', 1e-3)
-	config.setdefault('c', np.zeros_like(dw))
+	config.setdefault('c', g_zeros_like(dw))
 	config.setdefault('eps', 1e-8)
 
-	weights_scale = np.linalg.norm(w.ravel())
+	weights_scale = np.linalg.norm(gflatten(w))
 
 	c = config['c'] + dw**2
-	alpha = config['learning_rate'] / (np.sqrt(c) + eps)
+	alpha = config['learning_rate'] / (c**0.5 + eps)
 
 	update = alpha * dw
-	update_scale = np.linalg.norm(update.ravel())
+	update_scale = np.linalg.norm(gflatten(update))
 
 	w -= update
 
@@ -147,11 +163,11 @@ def adam(w, dw, config=None):
 	config.setdefault('beta1', 0.9)
 	config.setdefault('beta2', 0.999)
 	config.setdefault('eps', 1e-8)
-	config.setdefault('m', np.zeros_like(w))
-	config.setdefault('v', np.zeros_like(w))
+	config.setdefault('m', g_zeros_like(w))
+	config.setdefault('v', g_zeros_like(w))
 	config.setdefault('t', 0)
 
-	weights_scale = np.linalg.norm(w.ravel())
+	weights_scale = np.linalg.norm(gflatten(w))
 
 	beta1, beta2, eps = config['beta1'], config['beta2'], config['eps']
 	t, m, v = config['t'], config['m'], config['v']
@@ -161,8 +177,8 @@ def adam(w, dw, config=None):
 
 	alpha = config['learning_rate'] * np.sqrt(1 - beta2 ** t) / (1 - beta1 ** t)
 
-	update = -alpha * (m / (np.sqrt(v) + eps))
-	update_scale = np.linalg.norm(update.ravel())
+	update = -alpha * (m / (v**0.5 + eps))
+	update_scale = np.linalg.norm(gflatten(update))
 
 	w += update
 

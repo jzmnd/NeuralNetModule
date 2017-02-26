@@ -36,6 +36,13 @@ class LinearClassifier():
 
 		self.update_function = methods[self.config['update_type']]
 
+	def forward(self, X, W=None):
+		if W is None:
+			W = self.weights
+		if W is None:
+			print "Train classifier or provide explicit weights"
+		return score_function(X, W)
+
 	def train(self, X, y, k=1):
 		print "TRAINING ON DATA"
 		print "  num of points      :", y.size
@@ -45,7 +52,7 @@ class LinearClassifier():
 		X = biastrick(X)
 		Winit = initializeweights(y.size, X.shape[0], k)
 
-		results = grad_descent(X, y, Winit, self.config, self.compute_loss)
+		results = grad_descent(X, y, Winit, self.config, self.compute_loss, self.forward)
 
 		self.losses = results[0]
 		self.weights = results[1]
@@ -66,12 +73,6 @@ class LinearClassifier():
 			dW += self.config['gamma'] * W
 
 		return loss, dW
-
-	def run(self, X):
-		if not weights:
-			print "Train classifier first!"
-			return
-		return score_function(X, self.weights)
 
 	def plot(self):
 		quickPlot("loss_f{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.losses],

@@ -5,7 +5,7 @@ layers:
     id: 0
     type: 'inputLayer'
     config:
-        dims: 3073
+        dims: 2
   - name: 'layer1'
     id: 1
     type: 'hiddenLayer'
@@ -14,7 +14,7 @@ layers:
         activation: 'reLU'
         reg: true
         gamma: 0.01
-        dims: 200
+        dims: 4
   - name: 'layer2'
     id: 2
     type: 'hiddenLayer'
@@ -23,13 +23,13 @@ layers:
         activation: 'reLU'
         reg: true
         gamma: 0.01
-        dims: 120
+        dims: 8
   - name: 'layer3'
     id: 3
     type: 'outputLayer'
     config:
         init: 'random'
-        ftype: 'svm'
+        ftype: 'softmax'
         reg: true
         gamma: 0.01
-        dims: 10
+        dims: 3

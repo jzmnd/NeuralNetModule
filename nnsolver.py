@@ -54,6 +54,7 @@ class Solver():
 		self.update_function = methods[self.config['update_type']]
 
 	def train(self):
+		"""Perform training on NN"""
 		print "TRAINING ON DATA"
 		print "  model name         :", self.model.name
 		print "  num of points      :", self.num_images_train
@@ -64,17 +65,25 @@ class Solver():
 
 		self.init_weights(self.config['aini'], self.config['bini'])
 
-		# TODO: perform grad descent and updates
+		print self.model.weights[0].shape
+		print self.X_train.shape
+		print self.y_train.size
+		print self.config
 
-		results = grad_descent(self.X_train, self.y_train, self.model.weights, self.config, self.model.compute_loss)
+		results = grad_descent(self.X_train, self.y_train, self.model.weights, self.config, self.model.compute_loss, self.model.forward)
 
-		print results
+		self.losses = results[0]
+		self.model.weights = results[1]
+		self.dW = results[2]
+		self.gradcheck = results[3]
+		self.accuracy = results[4]
+		self.count = results[5]
 
 		return
 
 	def init_weights(self, a, b):
-		"""initialize weights for all layers"""
-		if not self.model.weights:
+		"""Initialize weights for all layers if not already initialized"""
+		if self.model.weights is None:
 			self.model.weights = []
 			for layer in self.model.layers:
 				if layer['type'] == 'inputLayer':
@@ -82,4 +91,5 @@ class Solver():
 				else:
 					self.model.weights.append(initializeweights(self.num_images_train, d, k=layer['config']['dims'], a=a, b=b))
 					d = layer['config']['dims']
+			self.model.weights = np.array(self.model.weights)
 		return

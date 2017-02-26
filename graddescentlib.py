@@ -32,27 +32,48 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 	-- analytic_grad: analytic gradient to compare to numerical gradient
 	-- num_checks: number of points to check
 	-- step: step size for numerical gradient calculation
+	-- Note that x can be either a simple 2d array or multiple 2d arrays for NN
 	"""
 
 	av_rel_error = 0
 
 	for i in xrange(num_checks):
-		ix = tuple([np.random.randint(m) for m in x.shape])
-		x0 = x[ix]
+		if x.dtype == 'float64':
+			ix = tuple([np.random.randint(m) for m in x.shape])
+			x0 = x[ix]
+			# evaluate at x + step
+			x[ix] = x0 + step
+			fxp = f(x)
+			# evaluate at x - step
+			x[ix] = x0 - step
+			fxm = f(x)
+			# return to original value
+			x[ix] = x0
+			# get the analytical gradient
+			grad_analytic = analytic_grad[ix]
 
-		# evaluate at x + step
-		x[ix] = x0 + step
-		fxp = f(x)
-		# evaluate at x - step
-		x[ix] = x0 - step
-		fxm = f(x)
-		# return to original value
-		x[ix] = x0
+		elif x.dtype == 'object':
+			ixlayer = np.random.randint(x.size)
+			ix = tuple([np.random.randint(m) for m in x[ixlayer].shape])
+			x0 = x[ixlayer][ix]
+			# evaluate at x + step
+			x[ixlayer][ix] = x0 + step
+			fxp = f(x)
+			# evaluate at x - step
+			x[ixlayer][ix] = x0 - step
+			fxm = f(x[ixlayer])
+			# return to original value
+			x[ixlayer][ix] = x0
+			# get the analytical gradient
+			grad_analytic = analytic_grad[ixlayer][ix]
+
+		else:
+			print "    error in dtype of weights"
+			return 0
+
 		# compute the numerical derivative
 		grad_numerical = 0.5 * (fxp - fxm) / step
-		# get the analytical gradient
-		grad_analytic = analytic_grad[ix]
-
+		# compute errors
 		rel_error = abs(grad_numerical - grad_analytic) / (abs(grad_numerical) + abs(grad_analytic))
 		av_rel_error += rel_error
 
@@ -62,17 +83,18 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 	return av_rel_error / num_checks
 
 
-def grad_descent(X, y, W, config, lossf):
+def grad_descent(X, y, W, config, lossf, scoref):
 	"""
 	Performs the gradient descent and weights update
-	-- X: holds all the data as columns (e.g. 3073 x 50,000 in CIFAR-10)
-	-- y: array of integers specifying correct class (e.g. 50,000-D array)
-	-- W: weights (e.g. 10 x 3073)
+	-- X: holds input data as columns
+	-- y: array of integers specifying correct classes
+	-- W: weights
 	-- config: dictionary containing all the configuration options
 	-- lossf: loss function (function that takes X, y, W and returns loss, dW)
+	-- scoref: score function (forward pass of NN or linear classifier score function)
 	-- Has options for 'full', 'minibatch' or 'stochastic'
 	-- Has options for weight update function from optutils
-	-- Has options for 'svm' or 'softmax' loss functions
+	-- Has options for 'svm' or 'softmax' loss function
 	"""
 
 	n = y.size
@@ -101,6 +123,7 @@ def grad_descent(X, y, W, config, lossf):
 
 		# define a function that takes a single arguement i.e. the weights and returns a single value i.e. the loss
 		f = lambda w: lossf(Xbatch, ybatch, w)[0]
+
 		# check gradient numerically for a few points
 		gradcheck = grad_check_sparse(f, W, analytic_grad=dW, num_checks=config['num_checks'], step=config['gradcheckstep'])
 
@@ -108,7 +131,7 @@ def grad_descent(X, y, W, config, lossf):
 		W, config, w_u_ratio = update_function(W, dW, config)
 
 		# calculate accuracy on fly
-		scores = score_function(X, W)
+		scores = scoref(X, W=W)
 		predicted_classes = np.argmax(scores, axis=0)
 		accuracy = np.mean(predicted_classes == y) * 100
 
