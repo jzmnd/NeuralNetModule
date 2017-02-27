@@ -20,7 +20,7 @@ layers:
     type: 'outputLayer'
     config:
         init: 'random'
-        ftype: 'svm'
+        ftype: 'softmax'
         reg: true
         gamma: 0.001
         dims: 3

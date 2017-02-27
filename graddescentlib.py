@@ -32,7 +32,7 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 	-- analytic_grad: analytic gradient to compare to numerical gradient
 	-- num_checks: number of points to check
 	-- step: step size for numerical gradient calculation
-	-- Note that x can be either a simple 2d array or multiple 2d arrays for NN
+	-- Note that x can be either a simple 2d array (float64) or multiple 2d arrays (object) for NN
 	"""
 
 	av_rel_error = 0

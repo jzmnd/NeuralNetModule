@@ -47,11 +47,9 @@ class FeedForwardNN():
 		# Clear cache
 		self.cache = []
 		for layer in self.layers:
-			#print "  forwardp:", layer['name'], 
 			if layer['type'] == 'inputLayer':
 				# Append output to cache
 				self.cache.append(X)
-				#print X.shape
 
 			if layer['type'] == 'hiddenLayer':
 				# Find weights and activation function for layer
@@ -60,7 +58,6 @@ class FeedForwardNN():
 				# Calculate output of layer and append to cache
 				X = activation_function(np.dot(Wi, X))
 				self.cache.append(X)
-				#print X.shape
 
 			if layer['type'] == 'outputLayer':
 				# Find weights for layer
@@ -68,7 +65,6 @@ class FeedForwardNN():
 				# Calculate output of layer and append to cache
 				X = np.dot(Wi, X)
 				self.cache.append(X)
-				#print X.shape
 		return X
 
 	def backprop(self, dX, W=None):
@@ -79,7 +75,6 @@ class FeedForwardNN():
 			print "Train NN or provide explicit weights"
 		dW_list = []
 		for layer in self.layers[::-1]:
-			#print "  backprop:", layer['name'],
 			if layer['type'] == 'outputLayer':
 				# Find weights and cached output for layer
 				Xi1 = self.cache[layer['id'] - 1]
@@ -89,7 +84,6 @@ class FeedForwardNN():
 				dW = np.dot(dX, Xi1.T)
 				dX = dX_tmp
 				dW_list.append(dW)
-				#print dX.shape, dW.shape
 
 			if layer['type'] == 'hiddenLayer':
 				# Find weights, cached output and activation function for layer
@@ -103,10 +97,8 @@ class FeedForwardNN():
 				dW = np.dot(dX, Xi1.T)
 				dX = dX_tmp
 				dW_list.append(dW)
-				#print dX.shape, dW.shape
 
 			if layer['type'] == 'inputLayer':
-				#print "NONE"
 				continue
 		return np.array(dW_list[::-1])
 

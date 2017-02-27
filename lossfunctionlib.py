@@ -86,7 +86,7 @@ def loss_function(scores, y, ftype='svm', delta=1.0):
 			indicatorf[y] = 1
 		else:
 			indicatorf[y, np.arange(num_images)] = 1
-		
+
 		# calculate gradient of softmax loss wrt scores (averaged over all images)
 		grad = (probs - indicatorf) / num_images
 

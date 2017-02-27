@@ -1,6 +1,6 @@
-ftype: 'svm'
+ftype: 'softmax'
 btype: 'minibatch'
-update_type: 'momentum'
+update_type: 'adam'
 reg: true
 gamma: 0.001
 maxloss: 0.2

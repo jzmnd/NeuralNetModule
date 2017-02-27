@@ -72,8 +72,8 @@ class Solver():
 		self.losses = results[0]
 		self.model.weights = results[1]
 		self.dW = results[2]
-		self.gradcheck = results[3]
-		self.accuracy = results[4]
+		self.gradchecks = results[3]
+		self.accuracies_train = results[4]
 		self.count = results[5]
 
 		return
