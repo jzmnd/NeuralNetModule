@@ -49,7 +49,6 @@ class LinearClassifier():
 		print "  num of dimensions  :", X.shape[0]
 		print "  num of classes     :", k
 
-		X = biastrick(X)
 		Winit = initializeweights(y.size, X.shape[0], k)
 
 		results = grad_descent(X, y, Winit, self.config, self.compute_loss, self.forward)

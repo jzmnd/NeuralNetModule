@@ -71,15 +71,19 @@ class FeedForwardNN():
 				#print X.shape
 		return X
 
-	def backprop(self, dX):
+	def backprop(self, dX, W=None):
 		"""Backward propagation of gradients through NN"""
+		if W is None:
+			W = self.weights
+		if W is None:
+			print "Train NN or provide explicit weights"
 		dW_list = []
 		for layer in self.layers[::-1]:
 			#print "  backprop:", layer['name'],
 			if layer['type'] == 'outputLayer':
 				# Find weights and cached output for layer
 				Xi1 = self.cache[layer['id'] - 1]
-				Wi = self.weights[layer['id'] - 1]
+				Wi = W[layer['id'] - 1]
 				# Calculate gradients and append to dw list
 				dX_tmp = np.dot(Wi.T, dX)
 				dW = np.dot(dX, Xi1.T)
@@ -92,7 +96,7 @@ class FeedForwardNN():
 				activation_function_grad = gradientfunctions[layer['config']['activation']]
 				Xi = self.cache[layer['id']]
 				Xi1 = self.cache[layer['id'] - 1]
-				Wi = self.weights[layer['id'] - 1]
+				Wi = W[layer['id'] - 1]
 				# Calculate gradients and append to dW list
 				dX = np.multiply(activation_function_grad(Xi), dX)
 				dX_tmp = np.dot(Wi.T, dX)
@@ -109,7 +113,7 @@ class FeedForwardNN():
 	def compute_loss(self, X, y, W):
 		"""Computes loss and gradients wrt weights, based on scores compared to y"""
 		# Compute forward pass scores
-		scores = self.forward(X)
+		scores = self.forward(X, W=W)
 
 		# Loss function type (config on last layer)
 		ftype = self.layers[-1]['config']['ftype']
@@ -117,7 +121,7 @@ class FeedForwardNN():
 		loss, dscores = loss_function(scores, y, ftype=ftype)
 
 		# Backprop of gradient
-		dW = self.backprop(dscores)
+		dW = self.backprop(dscores, W=W)
 
 		# Add regularization loss to each layer
 		for layer in self.layers:
@@ -125,6 +129,6 @@ class FeedForwardNN():
 				continue
 			else:
 				if layer['config']['reg']:
-					loss += 0.5 * layer['config']['gamma'] * np.sum(self.weights[layer['id'] - 1]**2)
-					dW[layer['id'] - 1] += layer['config']['gamma'] * self.weights[layer['id'] - 1]
+					loss += 0.5 * layer['config']['gamma'] * np.sum(W[layer['id'] - 1]**2)
+					dW[layer['id'] - 1] += layer['config']['gamma'] * W[layer['id'] - 1]
 		return loss, dW

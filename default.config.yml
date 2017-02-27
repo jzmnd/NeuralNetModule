@@ -1,12 +1,12 @@
-ftype: 'softmax'
+ftype: 'svm'
 btype: 'minibatch'
-update_type: 'sgd'
+update_type: 'momentum'
 reg: true
-gamma: 0.01
-maxloss: 1.0
-maxsteps: 1000
-batch_size: 8
-learning_rate: 1.0e-03
+gamma: 0.001
+maxloss: 0.2
+maxsteps: 2000
+batch_size: 128
+learning_rate: 0.05
 lr_decay: 0.95
 mu: 0.9
 beta1: 0.9
@@ -16,4 +16,4 @@ gradcheckstep: 1.0e-06
 num_checks: 3
 eps: 1.0e-08
 aini: 2.0
-bini: 0.01
+bini: 0.1

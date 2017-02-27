@@ -1,4 +1,4 @@
-name: 'defaultNNarch'
+name: 'spiralNNarch'
 nettype: 'sequential'
 layers:
   - name: 'layer0'
@@ -11,25 +11,16 @@ layers:
     type: 'hiddenLayer'
     config:
         init: 'random'
-        activation: 'reLU'
+        activation: 'leakyreLU'
         reg: true
-        gamma: 0.01
-        dims: 4
+        gamma: 0.001
+        dims: 100
   - name: 'layer2'
     id: 2
-    type: 'hiddenLayer'
-    config:
-        init: 'random'
-        activation: 'reLU'
-        reg: true
-        gamma: 0.01
-        dims: 8
-  - name: 'layer3'
-    id: 3
     type: 'outputLayer'
     config:
         init: 'random'
-        ftype: 'softmax'
+        ftype: 'svm'
         reg: true
-        gamma: 0.01
+        gamma: 0.001
         dims: 3

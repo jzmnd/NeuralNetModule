@@ -64,11 +64,8 @@ class Solver():
 		print "  init learning rate :", self.config['learning_rate']
 
 		self.init_weights(self.config['aini'], self.config['bini'])
-
-		print self.model.weights[0].shape
-		print self.X_train.shape
-		print self.y_train.size
-		print self.config
+		for w in self.model.weights:
+			print "  w shape:", w.shape
 
 		results = grad_descent(self.X_train, self.y_train, self.model.weights, self.config, self.model.compute_loss, self.model.forward)
 
@@ -84,6 +81,7 @@ class Solver():
 	def init_weights(self, a, b):
 		"""Initialize weights for all layers if not already initialized"""
 		if self.model.weights is None:
+			print "Initializing weights..."
 			self.model.weights = []
 			for layer in self.model.layers:
 				if layer['type'] == 'inputLayer':

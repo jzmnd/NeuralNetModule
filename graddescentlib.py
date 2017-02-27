@@ -61,7 +61,7 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 			fxp = f(x)
 			# evaluate at x - step
 			x[ixlayer][ix] = x0 - step
-			fxm = f(x[ixlayer])
+			fxm = f(x)
 			# return to original value
 			x[ixlayer][ix] = x0
 			# get the analytical gradient

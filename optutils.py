@@ -132,7 +132,7 @@ def adagrad(w, dw, config=None):
 	weights_scale = np.linalg.norm(gflatten(w))
 
 	c = config['c'] + dw**2
-	alpha = config['learning_rate'] / (c**0.5 + eps)
+	alpha = config['learning_rate'] / (c**0.5 + config['eps'])
 
 	update = alpha * dw
 	update_scale = np.linalg.norm(gflatten(update))
