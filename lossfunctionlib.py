@@ -89,7 +89,7 @@ def loss_function(scores, y, ftype='svm', delta=1.0):
 		grad = (probs - indicatorf) / num_images
 
 	else:
-		print "Incorrect loss function type"
+		print "ERROR: Incorrect loss function type"
 		loss = 0
 		grad = np.zeros(scores.shape)
 

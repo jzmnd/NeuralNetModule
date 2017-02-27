@@ -136,7 +136,7 @@ def grad_descent(X, y, W, config, lossf, scoref):
 
 		if config['verbose']:
 			if (count % 10 == 0) or (count == 1):
-				print "step: {:4d}   loss: {:.5e}   w/u ratio: {:.3e}   gradcheck: {:.3e}   accuracy: {:.2f} %".format(count, loss, w_u_ratio, gradcheck, accuracy)
+				print "  step: {:4d}   loss: {:.5e}   w/u ratio: {:.3e}   gradcheck: {:.3e}   accuracy: {:.2f} %".format(count, loss, w_u_ratio, gradcheck, accuracy)
 
 		gradchecks.append(gradcheck)
 		accuracies.append(accuracy)

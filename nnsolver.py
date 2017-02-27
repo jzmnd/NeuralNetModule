@@ -40,7 +40,7 @@ class Solver():
 		self.gradchecks = []
 		self.losses = []
 		self.accuracies_train = []
-		self.accuracies_val = 0
+		self.accuracy_val = 0
 
 		self.config = load_config(config)
 
@@ -67,6 +67,7 @@ class Solver():
 
 		self.model.init_weights(self.config['aini'], self.config['bini'], self.num_images_train, self.Xinputdims, self.k)
 
+		print "GRADIENT DESCENT"
 		results = grad_descent(self.X_train, self.y_train, self.model.weights, self.config, self.model.compute_loss, self.model.forward)
 
 		self.losses = results[0]
@@ -81,7 +82,11 @@ class Solver():
 	def validate(self):
 		"""Check accuracy with validation data"""
 		print "VALIDATION ACCURACY"
-
+		scores = self.model.forward(self.X_val)
+		predicted_classes = np.argmax(scores, axis=0)
+		self.accuracy_val = np.mean(predicted_classes == self.y_val) * 100
+		print "  model name         :", self.model.name
+		print "  accuracy           : {:.5f} %".format(self.accuracy_val)
 		return
 
 	def plot(self):

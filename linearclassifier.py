@@ -34,7 +34,7 @@ class LinearClassifier():
 		if W is None:
 			W = self.weights
 		if W is None:
-			print "Train classifier or provide explicit weights"
+			print "ERROR: Train classifier or provide explicit weights"
 		return score_function(X, W)
 
 	def compute_loss(self, X, y, W):

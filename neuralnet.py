@@ -40,7 +40,7 @@ class FeedForwardNN():
 		if W is None:
 			W = self.weights
 		if W is None:
-			print "Train NN or provide explicit weights"
+			print "ERROR: Train NN or provide explicit weights"
 		# Clear cache
 		self.cache = []
 		for layer in self.layers:
@@ -69,7 +69,7 @@ class FeedForwardNN():
 		if W is None:
 			W = self.weights
 		if W is None:
-			print "Train NN or provide explicit weights"
+			print "ERROR: Train NN or provide explicit weights"
 		dW_list = []
 		for layer in self.layers[::-1]:
 			if layer['type'] == 'outputLayer':
