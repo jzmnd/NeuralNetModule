@@ -16,8 +16,8 @@ import os
 import sys
 import numpy as np
 import random as rnd
-from optutils import *
-from funcutils import *
+from utils.optutils import *
+from utils.funcutils import *
 
 __author__ = "Jeremy Smith"
 __version__ = "1.1"

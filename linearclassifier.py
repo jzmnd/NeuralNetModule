@@ -13,8 +13,8 @@ import os
 import sys
 import numpy as np
 from lossfunctionlib import *
-from datautils import *
-from funcutils import *
+from utils.datautils import *
+from utils.funcutils import *
 
 __author__ = "Jeremy Smith"
 __version__ = "1.1"

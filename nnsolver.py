@@ -15,7 +15,7 @@ from myfunctions import *
 import numpy as np
 from lossfunctionlib import *
 from graddescentlib import *
-from datautils import *
+from utils.datautils import *
 
 __author__ = "Jeremy Smith"
 __version__ = "1.2"
