@@ -37,17 +37,17 @@ def biastrick(X):
 	return np.vstack([X, np.ones(num_images)])
 
 
-def load_arch(filename):
+def load_arch(filename, path="architectures-configs"):
 	"""Loads yaml architecture file and returns model as python dictionary"""
-	with open(filename, 'r') as f:
+	with open(os.path.join(path, filename), 'r') as f:
 		modeldict = yaml.load(f)
 	nLayers = len(modeldict['layers'])
 	return modeldict, nLayers
 
 
-def load_config(filename):
+def load_config(filename, path="architectures-configs"):
 	"""Loads yaml config file and returns python dictionary"""
-	with open(filename, 'r') as f:
+	with open(os.path.join(path, filename), 'r') as f:
 		configdict = yaml.load(f)
 	return configdict
 
