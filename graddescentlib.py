@@ -3,7 +3,7 @@
 graddescentlib.py
 Gradient Descent Library Module
 
- -- Contians functions for gradient descent and numerical gradient calculations
+-- Contians functions for gradient descent and numerical gradient calculations
 
 Based on CS231n course by Andrej Karpathy
 Created by Jeremy Smith on 2016-04-07
@@ -14,7 +14,6 @@ j-smith@berkeley.edu
 from __future__ import division
 import os
 import sys
-from myfunctions import *
 import numpy as np
 import random as rnd
 from optutils import *
@@ -103,10 +102,11 @@ def grad_descent(X, y, W, config, lossf, scoref):
 	gradchecks = []
 	losses = []
 	accuracies = []
-
 	update_function = methods[config['update_type']]
 
+	# loops while loss > maxloss or until maxsteps is reached
 	while (loss > config['maxloss']) and (count <= config['maxsteps']):
+		# creates training batch data (full, minibatch or stochastic)
 		if config['btype'] == 'minibatch' or config['btype'] == 'stochastic':
 			if config['btype'] == 'stochastic':
 				mask = rnd.sample(xrange(n), 1)
@@ -123,7 +123,6 @@ def grad_descent(X, y, W, config, lossf, scoref):
 
 		# define a function that takes a single arguement i.e. the weights and returns a single value i.e. the loss
 		f = lambda w: lossf(Xbatch, ybatch, w)[0]
-
 		# check gradient numerically for a few points
 		gradcheck = grad_check_sparse(f, W, analytic_grad=dW, num_checks=config['num_checks'], step=config['gradcheckstep'])
 
@@ -144,4 +143,4 @@ def grad_descent(X, y, W, config, lossf, scoref):
 		losses.append(loss)
 		count += 1
 
-	return np.array(losses), W, dW, np.array(gradcheck), np.array(accuracies), count
+	return np.array(losses), W, dW, np.array(gradchecks), np.array(accuracies), count

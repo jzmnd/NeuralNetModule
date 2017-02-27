@@ -11,16 +11,13 @@ j-smith@berkeley.edu
 
 import os
 import sys
-from myfunctions import *
 import numpy as np
 from lossfunctionlib import *
-from graddescentlib import *
 from datautils import *
 from funcutils import *
-import yaml
 
 __author__ = "Jeremy Smith"
-__version__ = "1.0"
+__version__ = "1.1"
 
 
 class FeedForwardNN():
@@ -124,3 +121,17 @@ class FeedForwardNN():
 					loss += 0.5 * layer['config']['gamma'] * np.sum(W[layer['id'] - 1]**2)
 					dW[layer['id'] - 1] += layer['config']['gamma'] * W[layer['id'] - 1]
 		return loss, dW
+
+	def init_weights(self, a, b, n, d, k):
+		"""Initialize weights for all layers if not already initialized"""
+		if self.weights is None:
+			print "INITIALIZING WEIGHTS..."
+			self.weights = []
+			for layer in self.layers:
+				if layer['type'] == 'inputLayer':
+					d = layer['config']['dims']
+				else:
+					self.weights.append(initializeweights(n, d, k=layer['config']['dims'], a=a, b=b))
+					d = layer['config']['dims']
+			self.weights = np.array(self.weights)
+		return

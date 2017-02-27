@@ -3,8 +3,8 @@
 funcutils.py
 General Mathematical Function Utilities
 
- -- Activation functions and their gradients
- -- Score functions
+-- Activation functions and their gradients
+-- Score functions
 
 Based on CS231n course by Andrej Karpathy
 Created by Jeremy Smith on 2016-04-07
@@ -17,26 +17,32 @@ import numpy as np
 
 
 def tanhf(x):
+	"""Tanh activation function"""
 	return np.tanh(x)
 
 
 def reLUf(x):
+	"""ReLU activation function"""
 	return x * (x > 0)
 
 
 def leakyreLUf(x, alpha=0.001):
+	"""Leaky ReLU activation function"""
 	return x * (x > 0) + alpha * x * (x < 0)
 
 
 def tanhg(x):
+	"""Tanh gradient function"""
 	return 1.0 - (np.tanh(x))**2
 
 
 def reLUg(x):
+	"""ReLU gradient function"""
 	return 1.0 * (x > 0)
 
 
 def leakyreLUg(x, alpha=0.001):
+	"""Leaky ReLU gradient function"""
 	return 1.0 * (x > 0) + alpha * (x <= 0)
 
 

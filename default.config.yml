@@ -4,7 +4,7 @@ update_type: 'adam'
 reg: true
 gamma: 0.001
 maxloss: 0.2
-maxsteps: 2000
+maxsteps: 200
 batch_size: 128
 learning_rate: 0.05
 lr_decay: 0.95

@@ -3,7 +3,7 @@
 lossfunctionlib.py
 Loss Function Library Module
 
- -- Contains loss function for SVM and Softmax
+-- Contains loss function for SVM and Softmax
 
 Based on CS231n course by Andrej Karpathy
 Created by Jeremy Smith on 2016-04-07
@@ -14,9 +14,7 @@ j-smith@berkeley.edu
 from __future__ import division
 import os
 import sys
-from myfunctions import *
 import numpy as np
-import random as rnd
 
 __author__ = "Jeremy Smith"
 __version__ = "1.2"
@@ -25,13 +23,13 @@ __version__ = "1.2"
 def loss_function(scores, y, ftype='svm', delta=1.0):
 	"""
 	Loss function implementation (fully vectorized, also works if number of images is 1)
-	  -- scores: holds all the input scores as columns (e.g. 10 x 50,000 in CIFAR-10)
-	  -- y: array of integers specifying correct class (e.g. 50,000-D array)
-	  -- W: weights (e.g. 10 x 3073)
-	  -- type: can be either 'svm' or 'softmax'
+	-- scores: holds all the input scores as columns (e.g. 10 x 50,000 in CIFAR-10)
+	-- y: array of integers specifying correct class (e.g. 50,000-D array)
+	-- W: weights (e.g. 10 x 3073)
+	-- type: can be either 'svm' or 'softmax'
 	Returns
-	  -- Loss scalar (svm or softmax)
-	  -- Gradient of loss wrt scores
+	-- Loss scalar (svm or softmax)
+	-- Gradient of loss wrt scores
 	"""
 
 	num_images = y.size

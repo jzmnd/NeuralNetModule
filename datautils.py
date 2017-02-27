@@ -3,10 +3,10 @@
 datautils.py
 Data Utility Functions
 
- -- Functions for extracting CIFAR data and preprocessing
- -- Functions for loading NN architecture model and config yaml file
- -- Preprocessing function
- -- Weight initialization function
+-- Functions for extracting CIFAR data and preprocessing
+-- Functions for loading NN architecture model and config yaml file
+-- Preprocessing function
+-- Weight initialization function
 
 Based on CS231n course by Andrej Karpathy
 Created by Jeremy Smith on 2016-04-07
@@ -14,6 +14,7 @@ University of California, Berkeley
 j-smith@berkeley.edu
 """
 
+from __future__ import division
 import os
 import sys
 import cPickle as pickle
@@ -66,7 +67,7 @@ def preprocess(x, norm=None):
 
 
 def initializeweights(num_images, num_dims, k=1, a=2.0, b=0.01):
-	"""Initialize weights for array of size """
+	"""Initialize weights for array of size num_dims x k"""
 	if k == 1:
 		return b * np.random.randn(num_dims).astype('float64') * np.sqrt(a / num_images)
 	else:

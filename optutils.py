@@ -3,9 +3,9 @@
 optutils.py
 Functions for Optimising Gradient Descent
 
- -- Calculates new weights from original weights and dw
- -- Updates config dictionary with optimising parameters
- -- Calculates ratio of norm(weight):norm(update)
+-- Calculates new weights from original weights and dw
+-- Updates config dictionary with optimising parameters
+-- Calculates ratio of norm(weight):norm(update)
 
 Based on CS231n course by Andrej Karpathy
 Created by Jeremy Smith on 2016-04-07
@@ -38,7 +38,7 @@ def sgd(w, dw, config=None):
 	Performs vanilla stochastic gradient descent
 
 	config format:
-	- learning_rate: Scalar learning rate
+	-- learning_rate: Scalar learning rate
 	"""
 	if config is None:
 		config = {}
@@ -59,9 +59,9 @@ def momentum(w, dw, config=None):
 	Performs momentum update
 
 	config format:
-	- learning_rate: Scalar learning rate
-	- mu: Mass parameter
-	- v: Velocity
+	-- learning_rate: Scalar learning rate
+	-- mu: Mass parameter
+	-- v: Velocity
 	"""
 	if config is None:
 		config = {}
@@ -88,9 +88,9 @@ def nag(w, dw, config=None):
 	Performs Nesterov momentum update
 
 	config format:
-	- learning_rate: Scalar learning rate
-	- mu: Mass parameter
-	- v: Velocity
+	-- learning_rate: Scalar learning rate
+	-- mu: Mass parameter
+	-- v: Velocity
 	"""
 	if config is None:
 		config = {}
@@ -119,9 +119,9 @@ def adagrad(w, dw, config=None):
 	Performs an AdaGrad update
 
 	config format:
-	- learning_rate: Scalar learning rate
-	- c: Cache of sum of square gradient
-	- eps: Small scalar used for smoothing to avoid dividing by zero
+	-- learning_rate: Scalar learning rate
+	-- c: Cache of sum of square gradient
+	-- eps: Small scalar used for smoothing to avoid dividing by zero
 	"""
 	if config is None:
 		config = {}
@@ -149,13 +149,13 @@ def adam(w, dw, config=None):
 	Performs an Adam update
 
 	config format:
-	- learning_rate: Scalar learning rate
-	- beta1: Decay rate for moving average of first moment of gradient
-	- beta2: Decay rate for moving average of second moment of gradient
-	- eps: Small scalar used for smoothing to avoid dividing by zero
-	- m: Moving average of gradient
-	- v: Moving average of squared gradient
-	- t: Iteration number
+	-- learning_rate: Scalar learning rate
+	-- beta1: Decay rate for moving average of first moment of gradient
+	-- beta2: Decay rate for moving average of second moment of gradient
+	-- eps: Small scalar used for smoothing to avoid dividing by zero
+	-- m: Moving average of gradient
+	-- v: Moving average of squared gradient
+	-- t: Iteration number
 	"""
 	if config is None:
 		config = {}
