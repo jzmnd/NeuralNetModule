@@ -1,12 +1,12 @@
-ftype: 'svm'
+ftype: 'softmax'
 btype: 'minibatch'
 update_type: 'adam'
 reg: true
-gamma: 0.01
+gamma: 0.001
 maxloss: 0.2
 maxsteps: 1000
-batch_size: 256
-learning_rate: 2.0e-04
+batch_size: 16
+learning_rate: 0.1
 lr_decay: 0.95
 mu: 0.9
 beta1: 0.9

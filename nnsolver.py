@@ -40,7 +40,7 @@ class Solver():
 		self.gradchecks = []
 		self.losses = []
 		self.accuracies_train = []
-		self.accuracy_val = 0
+		self.accuracies_val = []
 
 		self.config = load_config(config)
 
@@ -64,29 +64,13 @@ class Solver():
 		print "  num of classes     :", self.k
 		print "  solver update type :", self.config['update_type'], self.config['btype']
 		print "  init learning rate :", self.config['learning_rate']
+		print "  loss function      :", self.config['ftype']
 
 		self.model.init_weights(self.config['aini'], self.config['bini'], self.num_images_train, self.Xinputdims, self.k)
 
 		print "GRADIENT DESCENT"
-		results = grad_descent(self.X_train, self.y_train, self.model.weights, self.config, self.model.compute_loss, self.model.forward)
-
-		self.losses = results[0]
-		self.model.weights = results[1]
-		self.dW = results[2]
-		self.gradchecks = results[3]
-		self.accuracies_train = results[4]
-		self.count = results[5]
-
-		return
-
-	def validate(self):
-		"""Check accuracy with validation data"""
-		print "VALIDATION ACCURACY"
-		scores = self.model.forward(self.X_val)
-		predicted_classes = np.argmax(scores, axis=0)
-		self.accuracy_val = np.mean(predicted_classes == self.y_val) * 100
-		print "  model name         :", self.model.name
-		print "  accuracy           : {:.5f} %".format(self.accuracy_val)
+		results = grad_descent(self.X_train, self.y_train, self.X_val, self.y_val, self.model.weights, self.config, self.model.compute_loss, self.model.forward)
+		self.losses, self.model.weights, self.dW, self.gradchecks, self.accuracies_train, self.accuracies_val, self.count = results
 		return
 
 	def plot(self):
@@ -94,13 +78,14 @@ class Solver():
 			xlabel="step", ylabel="loss", yscale="log")
 		quickPlot("grad_err{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.gradchecks],
 			xlabel="step", ylabel="relative grad error", yscale="log")
-		quickPlot("accuracy{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.accuracies_train],
+		quickPlot("accuracy{:s}".format(self.filenametag), self.path, [np.arange(self.count-1) + 1, self.accuracies_train, self.accuracies_val],
 			xlabel="step", ylabel="accuracy [%]", yscale="linear")
 		return
 
 	def writeout(self):
 		dataOutputGen("losses{:s}.txt".format(self.filenametag), self.path, self.losses)
 		dataOutputGen("gradcheck{:s}.txt".format(self.filenametag), self.path, self.gradchecks)
-		dataOutputGen("accuracy{:s}.txt".format(self.filenametag), self.path, self.accuracies_train)
+		dataOutputGen("accuracytrn{:s}.txt".format(self.filenametag), self.path, self.accuracies_train)
+		dataOutputGen("accuracyval{:s}.txt".format(self.filenametag), self.path, self.accuracies_val)
 		return
 

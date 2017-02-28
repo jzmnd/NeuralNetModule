@@ -23,6 +23,32 @@ __author__ = "Jeremy Smith"
 __version__ = "1.1"
 
 
+def accuracy(X, y, W, scoref):
+	"""Returns an accuracy based on X and y data"""
+	scores = scoref(X, W=W)
+	predicted_classes = np.argmax(scores, axis=0)
+	return np.mean(predicted_classes == y) * 100
+
+
+def batchdata(X, y, btype, bsize):
+	"""Creates training batch data (full, minibatch or stochastic)"""
+	if btype == 'minibatch' or btype == 'stochastic':
+		if btype == 'stochastic':
+			mask = rnd.sample(xrange(y.size), 1)
+		else:
+			mask = rnd.sample(xrange(y.size), bsize)
+		Xbatch = X[:, mask]
+		ybatch = y[mask]
+	elif btype == 'full':
+		Xbatch = X
+		ybatch = y
+	else:
+		print "ERROR: Incorrect batch type, using full"
+		Xbatch = X
+		ybatch = y
+	return Xbatch, ybatch
+
+
 def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=False):
 	"""
 	Samples random elements and returns numerical grad in these dimensions
@@ -67,7 +93,7 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 			grad_analytic = analytic_grad[ixlayer][ix]
 
 		else:
-			print "    error in dtype of weights"
+			print "ERROR: Incorrect dtype for weights (float64 or object)"
 			return 0
 
 		# compute the numerical derivative
@@ -77,16 +103,18 @@ def grad_check_sparse(f, x, analytic_grad=0, num_checks=3, step=1e-6, verbose=Fa
 		av_rel_error += rel_error
 
 		if verbose:
-			print "    numerical grad: {:.5f}, analytic grad: {:.5f}, relative error: {:.1e}".format(grad_numerical, grad_analytic, rel_error)
+			print "    numerical grad: {: .8f}, analytic grad: {: .8f}, relative error: {:.1e}".format(grad_numerical, grad_analytic, rel_error)
 
 	return av_rel_error / num_checks
 
 
-def grad_descent(X, y, W, config, lossf, scoref):
+def grad_descent(X, y, Xval, yval, W, config, lossf, scoref):
 	"""
 	Performs the gradient descent and weights update
 	-- X: holds input data as columns
 	-- y: array of integers specifying correct classes
+	-- Xval: holds validation X data
+	-- yval: holds validation y data
 	-- W: weights
 	-- config: dictionary containing all the configuration options
 	-- lossf: loss function (function that takes X, y, W and returns loss, dW)
@@ -96,28 +124,18 @@ def grad_descent(X, y, W, config, lossf, scoref):
 	-- Has options for 'svm' or 'softmax' loss function
 	"""
 
-	n = y.size
 	count = 1
 	loss = np.inf
 	gradchecks = []
 	losses = []
-	accuracies = []
+	accuracies_train = []
+	accuracies_val = []
 	update_function = methods[config['update_type']]
 
 	# loops while loss > maxloss or until maxsteps is reached
 	while (loss > config['maxloss']) and (count <= config['maxsteps']):
-		# creates training batch data (full, minibatch or stochastic)
-		if config['btype'] == 'minibatch' or config['btype'] == 'stochastic':
-			if config['btype'] == 'stochastic':
-				mask = rnd.sample(xrange(n), 1)
-			else:
-				mask = rnd.sample(xrange(n), config['batch_size'])
-			Xbatch = X[:, mask]
-			ybatch = y[mask]
-		else:
-			Xbatch = X
-			ybatch = y
-
+		# create batch data
+		Xbatch, ybatch = batchdata(X, y, config['btype'], config['batch_size'])
 		# calculate loss and gradient on loss wrt weights
 		loss, dW = lossf(Xbatch, ybatch, W)
 
@@ -129,18 +147,18 @@ def grad_descent(X, y, W, config, lossf, scoref):
 		# update weights using update_function, also calculates weights:updates ratio and updates config
 		W, config, w_u_ratio = update_function(W, dW, config)
 
-		# calculate accuracy on fly
-		scores = scoref(X, W=W)
-		predicted_classes = np.argmax(scores, axis=0)
-		accuracy = np.mean(predicted_classes == y) * 100
+		# calculate accuracies on fly
+		accuracy_train = accuracy(X, y, W, scoref)
+		accuracy_val = accuracy(Xval, yval, W, scoref)
 
 		if config['verbose']:
 			if (count % 10 == 0) or (count == 1):
-				print "  step: {:4d}   loss: {:.5e}   w/u ratio: {:.3e}   gradcheck: {:.3e}   accuracy: {:.2f} %".format(count, loss, w_u_ratio, gradcheck, accuracy)
+				print "  step: {:4d}   loss: {:.5e}   w/u ratio: {:.3e}   gradcheck: {:.3e}   acctrain: {:.2f} %   accval: {:.2f} %".format(count, loss, w_u_ratio, gradcheck, accuracy_train, accuracy_val)
 
 		gradchecks.append(gradcheck)
-		accuracies.append(accuracy)
+		accuracies_train.append(accuracy_train)
+		accuracies_val.append(accuracy_val)
 		losses.append(loss)
 		count += 1
 
-	return np.array(losses), W, dW, np.array(gradchecks), np.array(accuracies), count
+	return np.array(losses), W, dW, np.array(gradchecks), np.array(accuracies_train), np.array(accuracies_val), count
