@@ -10,128 +10,133 @@ j-smith@berkeley.edu
 """
 
 import os
-import sys
+import logging
+
 import numpy as np
-from lossfunctionlib import *
-from utils.datautils import *
-from utils.funcutils import *
+
+from lossfunctionlib import loss_function
+from utils.datautils import load_arch, initializeweights
+from utils.funcutils import functions, gradientfunctions
 
 __author__ = "Jeremy Smith"
-__version__ = "1.1"
+__version__ = "2.0"
 
 
-class FeedForwardNN():
-	"""Class for descibing basic fully connected feed forward neural network"""
-	def __init__(self, weights=None, architecture="default.arch.yml", name="default"):
-		self.weights = weights
-		self.name = name
-		self.path = os.path.dirname(os.path.abspath(__file__))
+class FeedForwardNN:
+    """Class for descibing basic fully connected feed forward neural network"""
 
-		# Loads NN architecture and sorts layers by id number
-		self.architecture, self.nlayers = load_arch(architecture)
-		self.archname = self.architecture['name']
-		self.layers = sorted(self.architecture['layers'], key=lambda l: l['id'])
+    def __init__(self, weights=None, architecture="default.arch.yml", name="default"):
+        self.weights = weights
+        self.name = name
+        self.path = os.path.dirname(os.path.abspath(__file__))
 
-		# Holds cached values for each layer
-		self.cache = []
+        # Loads NN architecture and sorts layers by id number
+        self.architecture, self.nlayers = load_arch(architecture)
+        self.archname = self.architecture["name"]
+        self.layers = sorted(self.architecture["layers"], key=lambda l: l["id"])
 
-	def forward(self, X, W=None):
-		"""Forward propagation of data through NN"""
-		if W is None:
-			W = self.weights
-		if W is None:
-			print "ERROR: Train NN or provide explicit weights"
-		# Clear cache
-		self.cache = []
-		for layer in self.layers:
-			if layer['type'] == 'inputLayer':
-				# Append output to cache
-				self.cache.append(X)
+        # Holds cached values for each layer
+        self.cache = []
 
-			if layer['type'] == 'hiddenLayer':
-				# Find weights and activation function for layer
-				activation_function = functions[layer['config']['activation']]
-				Wi = W[layer['id'] - 1]
-				# Calculate output of layer and append to cache
-				X = activation_function(np.dot(Wi, X))
-				self.cache.append(X)
+    def forward(self, X, W=None):
+        """Forward propagation of data through NN"""
+        if W is None:
+            W = self.weights
+        if W is None:
+            logging.error("Train NN or provide explicit weights")
+        # Clear cache
+        self.cache = []
+        for layer in self.layers:
+            if layer["type"] == "inputLayer":
+                # Append output to cache
+                self.cache.append(X)
 
-			if layer['type'] == 'outputLayer':
-				# Find weights for layer
-				Wi = W[layer['id'] - 1]
-				# Calculate output of layer and append to cache
-				X = np.dot(Wi, X)
-				self.cache.append(X)
-		return X
+            if layer["type"] == "hiddenLayer":
+                # Find weights and activation function for layer
+                activation_function = functions[layer["config"]["activation"]]
+                Wi = W[layer["id"] - 1]
+                # Calculate output of layer and append to cache
+                X = activation_function(np.dot(Wi, X))
+                self.cache.append(X)
 
-	def backprop(self, dX, W=None):
-		"""Backward propagation of gradients through NN"""
-		if W is None:
-			W = self.weights
-		if W is None:
-			print "ERROR: Train NN or provide explicit weights"
-		dW_list = []
-		for layer in self.layers[::-1]:
-			if layer['type'] == 'outputLayer':
-				# Find weights and cached output for layer
-				Xi1 = self.cache[layer['id'] - 1]
-				Wi = W[layer['id'] - 1]
-				# Calculate gradients and append to dw list
-				dX_tmp = np.dot(Wi.T, dX)
-				dW = np.dot(dX, Xi1.T)
-				dX = dX_tmp
-				dW_list.append(dW)
+            if layer["type"] == "outputLayer":
+                # Find weights for layer
+                Wi = W[layer["id"] - 1]
+                # Calculate output of layer and append to cache
+                X = np.dot(Wi, X)
+                self.cache.append(X)
+        return X
 
-			if layer['type'] == 'hiddenLayer':
-				# Find weights, cached output and activation function for layer
-				activation_function_grad = gradientfunctions[layer['config']['activation']]
-				Xi = self.cache[layer['id']]
-				Xi1 = self.cache[layer['id'] - 1]
-				Wi = W[layer['id'] - 1]
-				# Calculate gradients and append to dW list
-				dX = np.multiply(activation_function_grad(Xi), dX)
-				dX_tmp = np.dot(Wi.T, dX)
-				dW = np.dot(dX, Xi1.T)
-				dX = dX_tmp
-				dW_list.append(dW)
+    def backprop(self, dX, W=None):
+        """Backward propagation of gradients through NN"""
+        if W is None:
+            W = self.weights
+        if W is None:
+            logging.error("Train NN or provide explicit weights")
+        dW_list = []
+        for layer in self.layers[::-1]:
+            if layer["type"] == "outputLayer":
+                # Find weights and cached output for layer
+                Xi1 = self.cache[layer["id"] - 1]
+                Wi = W[layer["id"] - 1]
+                # Calculate gradients and append to dw list
+                dX_tmp = np.dot(Wi.T, dX)
+                dW = np.dot(dX, Xi1.T)
+                dX = dX_tmp
+                dW_list.append(dW)
 
-			if layer['type'] == 'inputLayer':
-				continue
-		return np.array(dW_list[::-1])
+            if layer["type"] == "hiddenLayer":
+                # Find weights, cached output and activation function for layer
+                activation_function_grad = gradientfunctions[layer["config"]["activation"]]
+                Xi = self.cache[layer["id"]]
+                Xi1 = self.cache[layer["id"] - 1]
+                Wi = W[layer["id"] - 1]
+                # Calculate gradients and append to dW list
+                dX = np.multiply(activation_function_grad(Xi), dX)
+                dX_tmp = np.dot(Wi.T, dX)
+                dW = np.dot(dX, Xi1.T)
+                dX = dX_tmp
+                dW_list.append(dW)
 
-	def compute_loss(self, X, y, W):
-		"""Computes loss and gradients wrt weights, based on scores compared to y"""
-		# Compute forward pass scores
-		scores = self.forward(X, W=W)
+            if layer["type"] == "inputLayer":
+                continue
+        return np.array(dW_list[::-1])
 
-		# Loss function type (config on last layer)
-		ftype = self.layers[-1]['config']['ftype']
-		# Calculate loss and gradient on loss wrt weights
-		loss, dscores = loss_function(scores, y, ftype=ftype)
+    def compute_loss(self, X, y, W):
+        """Computes loss and gradients wrt weights, based on scores compared to y"""
+        # Compute forward pass scores
+        scores = self.forward(X, W=W)
 
-		# Backprop of gradient
-		dW = self.backprop(dscores, W=W)
+        # Loss function type (config on last layer)
+        ftype = self.layers[-1]["config"]["ftype"]
+        # Calculate loss and gradient on loss wrt weights
+        loss, dscores = loss_function(scores, y, ftype=ftype)
 
-		# Add regularization loss to each layer
-		for layer in self.layers:
-			if layer['type'] == 'inputLayer':
-				continue
-			else:
-				if layer['config']['reg']:
-					loss += 0.5 * layer['config']['gamma'] * np.sum(W[layer['id'] - 1]**2)
-					dW[layer['id'] - 1] += layer['config']['gamma'] * W[layer['id'] - 1]
-		return loss, dW
+        # Backprop of gradient
+        dW = self.backprop(dscores, W=W)
 
-	def init_weights(self, a, b, n, d, k):
-		"""Initialize weights for all layers if not already initialized"""
-		if self.weights is None:
-			print "INITIALIZING WEIGHTS..."
-			self.weights = []
-			for layer in self.layers:
-				if layer['type'] == 'inputLayer':
-					d = layer['config']['dims']
-				else:
-					self.weights.append(initializeweights(n, d, k=layer['config']['dims'], a=a, b=b))
-					d = layer['config']['dims']
-			self.weights = np.array(self.weights)
-		return
+        # Add regularization loss to each layer
+        for layer in self.layers:
+            if layer["type"] == "inputLayer":
+                continue
+            else:
+                if layer["config"]["reg"]:
+                    loss += 0.5 * layer["config"]["gamma"] * np.sum(W[layer["id"] - 1] ** 2)
+                    dW[layer["id"] - 1] += layer["config"]["gamma"] * W[layer["id"] - 1]
+        return loss, dW
+
+    def init_weights(self, a, b, n, d, k):
+        """Initialize weights for all layers if not already initialized"""
+        if self.weights is None:
+            logging.info("INITIALIZING WEIGHTS...")
+            self.weights = []
+            for layer in self.layers:
+                if layer["type"] == "inputLayer":
+                    d = layer["config"]["dims"]
+                else:
+                    self.weights.append(
+                        initializeweights(n, d, k=layer["config"]["dims"], a=a, b=b)
+                    )
+                    d = layer["config"]["dims"]
+            self.weights = np.array(self.weights)
+        return
